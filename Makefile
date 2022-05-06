@@ -1,4 +1,6 @@
-NAME=CELL_NAME
+SPICE=$(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice
+NAME=sky130_fd_sc_hd__nand2_1
+PORT:=$(shell grep $(NAME) $(SPICE) | sed -E "s/.subckt [^ ]+ //")
 
 all: sim
 
@@ -14,9 +16,12 @@ magic:
 	# ext2spice cthresh 0
 	# ext2spice
 
-simulation.spice: pre.spice $(NAME).spice post.spice
+simulation.spice: pre.spice post.spice
 	# build a simulation with pre and post.spice
-	cat $^ > $@
+	@cat pre.spice > $@
+	@echo ".INC $(SPICE)" >> $@
+	@echo "Xcell $(PORT) $(NAME)" >> $@
+	@cat post.spice >> $@
 
 sim: simulation.spice
 	# run the simulation
@@ -24,5 +29,6 @@ sim: simulation.spice
 
 clean:
 	rm -f $(NAME).spice model.spice $(NAME).ext
+	rm simulation.spice
 
 phony: clean
